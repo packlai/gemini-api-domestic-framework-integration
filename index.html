@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Gemini API 国内能用吗？Gemini 代理接口配置与主流框架接入教程</title>
+  <meta name="description" content="Gemini API 国内能用吗？本文详解如何通过 Gemini 代理与中转站，解决国内无法调用 Gemini 接口的问题，并提供 Python、LangChain、Dify 等主流 AI 框架的接入配置教程。">
+  <meta name="keywords" content="Gemini API国内能用吗,Gemini代理,Gemini中转站,Gemini API调用,Gemini接口配置,Gemini API国内,Gemini LangChain,Gemini Dify接入,Gemini对接,大模型API中转,Google Gemini API,Gemini 3.8 Flash调用,AI API接口">
+  <meta name="author" content="作者名称">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://quanzil.com/articles/how-to-call-gpt-api-in-china.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="ai api">
+  <meta property="og:title" content="Gemini API 国内能用吗？Gemini 代理接口配置与主流框架接入教程">
+  <meta property="og:description" content="Gemini API 国内能用吗？本文详解如何通过 Gemini 代理与中转站，解决国内无法调用 Gemini 接口的问题，并提供 Python、LangChain、Dify 等主流 AI 框架的接入配置教程。">
+  <meta property="og:url" content="https://quanzil.com/articles/how-to-call-gpt-api-in-china.html">
+  <meta property="og:image" content="https://quanzil.com/images/article-cover.jpg">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Gemini API 国内能用吗？Gemini 代理接口配置与主流框架接入教程">
+  <meta name="twitter:description" content="Gemini API 国内能用吗？本文详解如何通过 Gemini 代理与中转站，解决国内无法调用 Gemini 接口的问题，并提供 Python、LangChain、Dify 等主流 AI 框架的接入配置教程。">
+  <meta name="twitter:image" content="https://quanzil.com/images/article-cover.jpg">
+
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #fff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #2563eb;
+      --accent-light: #eff6ff;
+      --code-bg: #111827;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.8;
+    }
+    a { color: var(--accent); }
+    .site-header {
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.97);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+    .header-inner, .page, .site-footer {
+      width: min(100% - 32px, 1100px);
+      margin: 0 auto;
+    }
+    .header-inner {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: max-content;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, .2);
+    }
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .brand {
+      color: var(--text);
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .brand-tagline {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+      margin-right: 22px;
+    }
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 0 11px;
+      border-radius: 7px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      white-space: nowrap;
+      transition: color .2s ease, background .2s ease;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: #f1f5f9;
+      color: var(--text);
+    }
+    .page { padding: 56px 0 72px; }
+    .article {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(24px, 5vw, 64px);
+      box-shadow: 0 8px 30px rgba(15, 23, 42, .04);
+    }
+    .article-header { margin-bottom: 40px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    h1 {
+      margin: 0 0 16px;
+      color: #111827;
+      font-size: clamp(30px, 5vw, 46px);
+      line-height: 1.25;
+      letter-spacing: -.02em;
+    }
+    .summary {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-target {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(37, 99, 235, .18);
+      transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+    .header-target:hover {
+      background: #1d4ed8;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(37, 99, 235, .25);
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .markdown-body { font-size: 17px; }
+    .markdown-body h2, .markdown-body h3, .markdown-body h4 {
+      margin: 2em 0 .7em;
+      color: #111827;
+      line-height: 1.35;
+    }
+    .markdown-body h2 {
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 28px;
+    }
+    .markdown-body h3 { font-size: 22px; }
+    .markdown-body p, .markdown-body ul, .markdown-body ol, .markdown-body blockquote { margin: 1em 0; }
+    .markdown-body img { max-width: 100%; height: auto; border-radius: 8px; }
+    .markdown-body blockquote {
+      margin-left: 0;
+      padding: 12px 18px;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-light);
+      color: #374151;
+    }
+    .markdown-body code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #f3f4f6;
+      font-size: .9em;
+    }
+    .markdown-body pre {
+      overflow-x: auto;
+      padding: 18px;
+      border-radius: 8px;
+      background: var(--code-bg);
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+    .markdown-body pre code { padding: 0; background: transparent; color: inherit; }
+    .markdown-body table { display: block; overflow-x: auto; border-collapse: collapse; width: 100%; }
+    .markdown-body th, .markdown-body td { padding: 9px 12px; border: 1px solid var(--line); text-align: left; }
+    .markdown-body th { background: #f9fafb; }
+    .site-footer { padding: 24px 0 48px; color: var(--muted); font-size: 13px; text-align: center; }
+    @media (max-width: 640px) {
+      .header-inner { min-height: 56px; }
+      .brand-tagline, .main-nav { display: none; }
+      .page { padding: 24px 0 40px; }
+      .article { padding: 22px 18px; }
+      .markdown-body { font-size: 16px; }
+      .header-actions { gap: 10px; }
+      .header-target { padding: 8px 11px; font-size: 13px; }
+      .brand-mark { width: 31px; height: 31px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a id="site-brand" class="brand-wrap" href="https://quanzil.com/" aria-label="返回网站首页">
+        <span id="brand-mark" class="brand-mark">AI</span>
+        <span class="brand-copy">
+          <span id="brand-name" class="brand">API</span>
+          <span id="brand-tagline" class="brand-tagline">让技术更简单</span>
+        </span>
+      </a>
+      <nav class="main-nav" aria-label="主导航">
+        <a id="nav-home" class="nav-link active" href="https://quanzil.com/">首页</a>
+        <a id="nav-articles" class="nav-link" href="https://quanzil.com/pricing">模型价格</a>
+        <a id="nav-docs" class="nav-link" href="https://docs.quanzil.com/">API 文档</a>
+        <a id="nav-pricing" class="nav-link" href="https://quanzil.com/news/focus">文章资讯</a>
+      </nav>
+      <div class="header-actions">
+        <a id="header-target" class="header-target" href="https://quanzil.com/" target="_blank" rel="noopener noreferrer">进入 API 中转站 →</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <article class="article" itemscope itemtype="https://schema.org/Article">
+      <header class="article-header">
+        <p class="eyebrow">原创文章</p>
+        <h1 id="article-title" itemprop="headline">Gemini API 国内能用吗？Gemini 代理接口配置与主流框架接入教程</h1>
+        <p id="article-summary" class="summary" itemprop="description">Gemini API 国内能用吗？本文详解如何通过 Gemini 代理与中转站，解决国内无法调用 Gemini 接口的问题，并提供 Python、LangChain、Dify 等主流 AI 框架的接入配置教程。</p>
+        <div class="meta">
+          <span>作者：<span id="article-author" itemprop="author">ai agent</span></span>
+          <span>发布时间：<time id="publish-date" itemprop="datePublished" datetime="2026-09-18">2026年09月18日</time></span>
+          <span>更新时间：<time id="update-date" itemprop="dateModified"></time></span>
+        </div>
+      </header>
+
+      <!-- 👇 Python 会直接将转好的 HTML 注入到这个 div 中 -->
+      <div id="markdown-content" class="markdown-body" itemprop="articleBody">
+<p>每天都有大量的开发者在社区提问：“<strong>Gemini API 国内能用吗？</strong>”“<strong>本地跑 Gemini 接口一直报超时怎么办？</strong>”</p>
+<p>答案是：<strong>官方原生的 Gemini API 在国内直连是无法使用的</strong>，会面临严格的 IP 限制和网络阻断。但是，通过<strong>Gemini 代理</strong>或<strong>大模型 API 中转站</strong>，国内开发者完全可以零门槛、低延迟地将 Gemini 接入到自己的业务代码或 AI 框架中。</p>
+<p><strong>国内最推荐的 AI API 中转站平台：</strong></p>
+<blockquote>
+<p>AI API 中转站平台地址：<a href="https://quanzil.com">https://quanzil.com</a></p>
+<p>AI API 中转站平台地址：<a href="https://quanzil.net">https://quanzil.net</a></p>
+</blockquote>
+<p>本文将详细介绍什么是 Gemini API 代理，如何获取接口权限，以及如何在 Python 纯代码、LangChain、Dify 等主流 AI 开发框架中快速配置 Gemini 模型。</p>
+<hr />
+<h2>为什么你需要一个 Gemini 中转站？</h2>
+<p>如果你尝试过自己去 Google AI Studio 申请 API，你通常会遇到这“三座大山”：</p>
+<ol>
+<li><strong>注册与绑卡阻碍</strong>：需要海外节点，且一旦超出极其有限的免费配额，就需要绑定海外实体信用卡才能继续使用。</li>
+<li><strong>网络超时报错</strong>：部署在阿里云、腾讯云等国内服务器上的程序，无法直接向 Google 接口发送 HTTP 请求，会直接报 <code>Connection Timeout</code>。</li>
+<li><strong>接口格式不兼容</strong>：Google 的官方 SDK（<code>@google/genai</code>）和目前行业事实上的标准（OpenAI 格式）不同。如果你想让一个项目同时支持 GPT 和 Gemini，原生的写法需要写两套完全独立的逻辑。</li>
+</ol>
+<p><strong>Gemini API 中转站</strong>（代理平台）完美解决了这三个问题：
+- <strong>网络直连</strong>：提供国内可直接访问的 API 域名（Base URL）。
+- <strong>统一计费</strong>：支持国内常见支付方式，按 Token 消耗计费，用多少充多少。
+- <strong>OpenAI 格式兼容</strong>：中转站会在底层自动将 OpenAI 的请求格式转换为 Gemini 认识的格式。这意味着，<strong>你可以直接用调用 GPT 的代码去调用 Gemini</strong>。</p>
+<hr />
+<h2>准备工作：获取你的 Gemini 代理凭证</h2>
+<p>在使用后续的任何代码或框架前，你需要先在中转站平台获取两个核心参数：</p>
+<ol>
+<li><strong>API Key</strong>：你的专属身份令牌（通常以 <code>sk-</code> 开头）。请妥善保管，不要泄漏到公开的 GitHub 仓库。</li>
+<li><strong>Base URL</strong>：中转平台的请求基地址。如果是 OpenAI 兼容接口，通常长这样：<code>https://your-api-domain.com/v1</code>。</li>
+</ol>
+<hr />
+<h2>基础代码接入：Python 与 Node.js 实战</h2>
+<p>我们先来看看最基础的纯代码调用方式，这适合自己写后端服务的开发者。</p>
+<h3>Python 接入（使用 OpenAI SDK）</h3>
+<p>因为中转站支持 OpenAI 兼容格式，请先安装 OpenAI 官方包：</p>
+<pre><code class="language-bash">pip install openai
+</code></pre>
+<p>然后，直接替换 <code>api_key</code> 和 <code>base_url</code>，并将 <code>model</code> 指定为 Gemini 的模型名称即可：</p>
+<pre><code class="language-python">import os
+from openai import OpenAI
+
+# 1. 配置中转站的 API 信息
+client = OpenAI(
+    api_key=&quot;YOUR_PROXY_API_KEY&quot;, 
+    base_url=&quot;https://your-api-domain.com/v1&quot;
+)
+
+def chat_with_gemini(prompt):
+    # 2. 调用具体的 Gemini 模型，比如 3.8 Flash
+    response = client.chat.completions.create(
+        model=&quot;gemini-3.8-flash&quot;,
+        messages=[
+            {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;你是一个资深的前端开发工程师。&quot;},
+            {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}
+        ],
+        temperature=0.7,
+        max_tokens=1000
+    )
+    return response.choices[0].message.content
+
+print(chat_with_gemini(&quot;请用 React 写一个简单的待办事项列表组件。&quot;))
+</code></pre>
+<h3>Node.js 接入（原生 Fetch）</h3>
+<p>如果你不想引入第三方 SDK，也可以直接用原生的 <code>fetch</code> 发送请求：</p>
+<pre><code class="language-javascript">const apiKey = &quot;YOUR_PROXY_API_KEY&quot;;
+const baseUrl = &quot;https://your-api-domain.com/v1/chat/completions&quot;;
+
+async function askGemini() {
+  const response = await fetch(baseUrl, {
+    method: &quot;POST&quot;,
+    headers: {
+      &quot;Content-Type&quot;: &quot;application/json&quot;,
+      &quot;Authorization&quot;: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: &quot;gemini-2.0-flash&quot;, // 切换为 Gemini 2.0
+      messages: [
+        { role: &quot;user&quot;, content: &quot;什么是大模型 API 中转？&quot; }
+      ],
+      temperature: 0.5
+    })
+  });
+
+  const data = await response.json();
+  if (data.choices &amp;&amp; data.choices.length &gt; 0) {
+    console.log(data.choices[0].message.content);
+  } else {
+    console.error(&quot;请求失败:&quot;, data);
+  }
+}
+
+askGemini();
+</code></pre>
+<hr />
+<h2>进阶教程：在主流 AI 框架中配置 Gemini 代理</h2>
+<p>现在的 AI 应用开发很少从零手写，大多依赖于优秀的开源框架。得益于中转平台的 OpenAI 兼容性，接入这些框架非常简单。</p>
+<h3>1. LangChain 接入 Gemini 中转站</h3>
+<p>在 LangChain 中，你<strong>不需要</strong>使用 <code>ChatGoogleGenerativeAI</code> 模块，而是直接使用 <code>ChatOpenAI</code> 模块。</p>
+<pre><code class="language-python">import os
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
+
+# 通过环境变量注入中转站配置，LangChain 会自动读取
+os.environ[&quot;OPENAI_API_KEY&quot;] = &quot;YOUR_PROXY_API_KEY&quot;
+os.environ[&quot;OPENAI_API_BASE&quot;] = &quot;https://your-api-domain.com/v1&quot;
+
+# 初始化模型时，强行指定为 Gemini 模型名
+llm = ChatOpenAI(
+    model=&quot;gemini-3.8-flash&quot;,
+    temperature=0.3
+)
+
+messages = [
+    SystemMessage(content=&quot;你是一个专业的英汉翻译专家。&quot;),
+    HumanMessage(content=&quot;Translate this: Using an API proxy simplifies integration.&quot;)
+]
+
+response = llm.invoke(messages)
+print(response.content)
+</code></pre>
+<p><em>优势：你的 RAG（检索增强生成）流程、Agent 逻辑完全不需要动，换模型只需改个字符串。</em></p>
+<hr />
+<h3>2. Dify 配置 Gemini 接口</h3>
+<p>Dify 是目前最火的低代码 AI 应用编排平台。如果你使用本地部署的 Dify，配置步骤如下：</p>
+<ol>
+<li>登录 Dify 后台，点击右上角进入 <strong>设置 (Settings)</strong> -&gt; <strong>模型供应商 (Model Providers)</strong>。</li>
+<li>不要选 Google 卡片！找到 <strong>OpenAI</strong> 或者 <strong>OpenAI-API-compatible</strong>（兼容 OpenAI 的自定义供应商）卡片。</li>
+<li>点击添加模型：</li>
+<li><strong>模型类型 (Model Type)</strong>：选择 <code>LLM</code>（文本生成）。</li>
+<li><strong>模型名称 (Model Name)</strong>：手动输入 <code>gemini-3.8-flash</code> 或中转站支持的模型。</li>
+<li><strong>API 端点 (API Endpoint)</strong>：填写 <code>https://your-api-domain.com/v1</code>。</li>
+<li><strong>API Key</strong>：填写中转站提供的 Key。</li>
+<li>验证并保存。之后你在搭建工作流时，就可以直接拖拽使用 Gemini 模型了。</li>
+</ol>
+<hr />
+<h3>3. FastGPT / AnythingLLM 配置</h3>
+<p>这些知识库问答工具的配置逻辑与 Dify 相似：
+- 找到“大模型配置”或“添加自定义大模型”的入口。
+- 将接口提供商选为 <code>OpenAI</code>。
+- 修改 <code>Base URL</code> 为中转站地址。
+- 填入中转站的 <code>API Key</code>。
+- 在可用模型列表中，自定义添加 <code>gemini-3.8-flash</code> 或 <code>gemini-3.8-pro</code>。</p>
+<hr />
+<h2>Gemini 核心模型参数怎么填？</h2>
+<p>中转平台通常会聚合多个大厂的模型，你在代码里的 <code>model</code> 参数必须精确匹配平台提供的模型名称，否则会报错。</p>
+<p>常用的 Gemini 模型填写规范如下（以平台实际支持为准）：</p>
+<ul>
+<li><code>gemini-3.8-flash</code>：最常用的轻量模型，速度极快，价格极其便宜，适合绝大多数文本摘要、问答、语言翻译场景。</li>
+<li><code>gemini-2.0-flash</code>：新一代高性价比模型，指令遵循和多模态能力更强。</li>
+<li><code>gemini-3.8-pro</code>：重型推理模型，价格较贵，适合处理复杂的代码逻辑、数学推理和长篇大论的深度分析。</li>
+</ul>
+<p><strong>避坑提示</strong>：不要自己发明模型名字（比如写成 <code>gemini-pro-3.8</code> 或 <code>google-gemini</code>），一定要严格参考 API 中转站后台的【可用模型列表】文档。</p>
+<hr />
+<h2>常见报错处理指南</h2>
+<p>如果你在接入过程中遇到问题，可以对照以下 HTTP 状态码进行排查：</p>
+<h3>HTTP 401 Unauthorized</h3>
+<ul>
+<li><strong>原因</strong>：鉴权失败。</li>
+<li><strong>解决办法</strong>：检查 API Key 是否复制正确，注意不要有前导或尾随空格；如果是自己构造 Headers，务必确保加上了 <code>Authorization: Bearer &lt;你的API_KEY&gt;</code>。</li>
+</ul>
+<h3>HTTP 404 Not Found</h3>
+<ul>
+<li><strong>原因</strong>：请求路径不对，或者找不到这个模型。</li>
+<li><strong>解决办法</strong>：<ol>
+<li>检查 <code>Base URL</code> 是否以 <code>/v1</code> 结尾（使用 OpenAI SDK 时必须带 <code>/v1</code>）。</li>
+<li>检查 <code>model</code> 参数填写的名称是否在中转站支持的模型列表中。</li>
+</ol>
+</li>
+</ul>
+<h3>HTTP 429 Too Many Requests</h3>
+<ul>
+<li><strong>原因</strong>：请求频率过高，触发了限流（Rate Limit），或者是账户余额已耗尽。</li>
+<li><strong>解决办法</strong>：登录中转平台查看账户余额。如果余额充足，说明并发太高，请在代码中增加 Sleep 延迟，或者使用指数退避（Exponential Backoff）进行重试。</li>
+</ul>
+<hr />
+<h2>总结</h2>
+<p>回答文章开头的问题：<strong>Gemini API 国内能用吗？</strong>
+能用，而且通过<strong>Gemini API 中转站</strong>接入，体验甚至比官方原生的方案更好。</p>
+<p>通过 OpenAI 兼容协议，你不仅解决了国内网络直连和海外支付的阻碍，还能将 Gemini 无缝嵌入到现有的代码体系和如 LangChain、Dify 等优秀的 AI 框架中。</p>
+<p>```</p>
+</div>
+
+      <!-- 👇 Python 会识别并删除这个占位符，保持输出页面干净 -->
+      
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div>© <span id="current-year"></span> 保留所有权利</div>
+  </footer>
+
+  <script>
+    // Python 会替换这里的内容
+    const articleConfig = {
+  "title": "Gemini API 国内能用吗？Gemini 代理接口配置与主流框架接入教程",
+  "summary": "Gemini API 国内能用吗？本文详解如何通过 Gemini 代理与中转站，解决国内无法调用 Gemini 接口的问题，并提供 Python、LangChain、Dify 等主流 AI 框架的接入配置教程。",
+  "author": "ai agent",
+  "published": "2026-10-08 00:00:00",
+  "canonical": "https://quanzil.com/articles/how-to-call-gpt-api-in-china.html",
+  "targetUrl": "https://quanzil.com/",
+  "targetLabel": "进入 API 中转站 →",
+  "siteName": "API ",
+  "siteTagline": "让技术更简单",
+  "brandMark": "AI",
+  "homeUrl": "https://quanzil.com/",
+  "articlesUrl": "https://quanzil.com/pricing",
+  "docsUrl": "https://docs.quanzil.com/",
+  "pricingUrl": "https://quanzil.com/news/focus"
+};
+
+    const formatDate = value => new Intl.DateTimeFormat('zh-CN', {
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date(value));
+
+    // 填充顶部和导航信息
+    document.title = `${articleConfig.title}｜网站名称`;
+    document.getElementById('site-brand').href = articleConfig.homeUrl;
+    document.getElementById('brand-name').textContent = articleConfig.siteName;
+    document.getElementById('brand-tagline').textContent = articleConfig.siteTagline;
+    document.getElementById('brand-mark').textContent = articleConfig.brandMark;
+    document.getElementById('nav-home').href = articleConfig.homeUrl;
+    document.getElementById('nav-articles').href = articleConfig.articlesUrl;
+    document.getElementById('nav-docs').href = articleConfig.docsUrl;
+    document.getElementById('nav-pricing').href = articleConfig.pricingUrl;
+
+    // 填充文章 Meta 数据
+    document.getElementById('article-title').textContent = articleConfig.title;
+    document.getElementById('article-summary').textContent = articleConfig.summary;
+    document.getElementById('article-author').textContent = articleConfig.author;
+    const headerTarget = document.getElementById('header-target');
+    headerTarget.href = articleConfig.targetUrl;
+    headerTarget.textContent = articleConfig.targetLabel;
+
+    document.getElementById('publish-date').textContent = formatDate(articleConfig.published);
+    document.getElementById('publish-date').dateTime = articleConfig.published;
+
+    const updated = new Date();
+    const updateDate = updated.toISOString().slice(0, 10);
+    document.getElementById('update-date').textContent = formatDate(updateDate);
+    document.getElementById('update-date').dateTime = updateDate;
+    document.getElementById('current-year').textContent = updated.getFullYear();
+
+    // 构建结构化数据 (对百度/Google SEO 极其重要)
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: articleConfig.title,
+      description: articleConfig.summary,
+      author: { '@type': 'Person', name: articleConfig.author },
+      datePublished: articleConfig.published,
+      dateModified: updateDate,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': articleConfig.canonical }
+    };
+    const schemaScript = document.createElement('script');
+    schemaScript.type = 'application/ld+json';
+    schemaScript.textContent = JSON.stringify(schema);
+    document.head.appendChild(schemaScript);
+  </script>
+</body>
+</html>
